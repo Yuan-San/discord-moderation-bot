@@ -1,5 +1,5 @@
-const { Client, Collection } = require("discord.js");
-const client = (global.client = new Client({ fetchAllMembers: true }));
+const { Client, Collection, Intents} = require("discord.js");
+const client = (global.client = new Client({intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_PRESENCES"]}, {fetchAllMembers: true}));
 const settings = require("./src/configs/settings.json");
 client.commands = new Collection();
 client.aliases = new Collection();

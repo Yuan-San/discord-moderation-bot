@@ -7,9 +7,9 @@ const ms = require("ms");
 
 module.exports = {
   conf: {
-    aliases: ["voicemute", "voice-mute"],
-    name: "vmute",
-    help: "vmute [kullanıcı] [süre] [sebep]",
+    aliases: ["vmute", "voice-mute"],
+    name: "voicemute",
+    help: "voicemute [user] [duration] [reason]",
   },
 
   /**
@@ -19,16 +19,16 @@ module.exports = {
    */
 
   run: async (client, message, args, embed) => {
-    if (!message.member.hasPermission(8) && !conf.penals.voiceMute.staffs.some(x => message.member.roles.cache.has(x))) return message.channel.error(message, "Yeterli yetkin bulunmuyor!");
+    if (!message.member.hasPermission(8) && !conf.penals.voiceMute.staffs.some(x => message.member.roles.cache.has(x))) return message.channel.error(message, "Not enough permission!");
     const member = message.mentions.members.first() || message.guild.members.cache.get(args[0]);
-    if (!member) return message.channel.error(message, "Bir üye belirtmelisin!");
-    if (conf.penals.voiceMute.roles.some(x => member.roles.cache.has(x))) return message.channel.error(message, "Bu üye zaten susturulmuş!");
+    if (!member) return message.channel.error(message, "You must specify a member!");
+    if (conf.penals.voiceMute.roles.some(x => member.roles.cache.has(x))) return message.channel.error(message, "This member is already voicemuted!");
     const duration = args[1] ? ms(args[1]) : undefined;
-    if (!duration) return message.channel.error(message, `Geçerli bir süre belirtmelisin!`);
-    const reason = args.slice(2).join(" ") || "Belirtilmedi!";
-    if (!message.member.hasPermission(8) && member.roles.highest.position >= message.member.roles.highest.position) return message.channel.error(message, "Kendinle aynı yetkide ya da daha yetkili olan birini susturamazsın!");
-    if (!member.manageable) return message.channel.error(message, "Bu üyeyi susturamıyorum!");
-    if (conf.penals.voiceMute.limit > 0 && vmuteLimit.has(message.author.id) && vmuteLimit.get(message.author.id) == conf.penals.voiceMute.limit) return message.channel.error(message, "Saatlik susturma sınırına ulaştın!");
+    if (!duration) return message.channel.error(message, `You must specify a valid voicemute duration!`);
+    const reason = args.slice(2).join(" ") || "Unspecified";
+    if (!message.member.hasPermission(8) && member.roles.highest.position >= message.member.roles.highest.position) return message.channel.error(message, "You can't voicemute someone who have the same or higher role with you!");
+    if (!member.manageable) return message.channel.error(message, "I can't voicemute this member!");
+    if (conf.penals.voiceMute.limit > 0 && vmuteLimit.has(message.author.id) && vmuteLimit.get(message.author.id) == conf.penals.voiceMute.limit) return message.channel.error(message, "You have reached your hourly voicemute limit!");
 
     member.roles.add(conf.penals.voiceMute.roles);
     if (member.voice.channelID && !member.voice.serverMute) {
@@ -36,22 +36,24 @@ module.exports = {
       member.roles.add(conf.penals.voiceMute.roles);
     }
     const penal = await client.penalize(message.guild.id, member.user.id, "VOICE-MUTE", true, message.author.id, reason, true, Date.now() + duration);
-    message.channel.send(embed.setDescription(`${member.toString()} üyesi, ${message.author} tarafından, \`${reason}\` nedeniyle **sesli kanallarda** susturuldu! \`(Ceza ID: #${penal.id})\``));
-    if (conf.dmMessages) member.send(`**${message.guild.name}** sunucusunda, **${message.author.tag}** tarafından, **${reason}** sebebiyle **sesli kanallarda** susturuldunuz!`).catch(() => {});
+    const time = ms(duration).replace("h", " hour(s)").replace("m", " minute(s)").replace("s", " second(s)");
+    message.channel.send(embed.setDescription(`Member ${member.toString()} has been Voicemuted by ${message.author} because of \`${reason}\` for **${time}**! \`(Case ID: #${penal.id})\``));
+    if (conf.dmMessages) member.send(`You have been Voicemuted at **${message.guild.name}** by **${message.author.tag}** because of **${reason}** for **${time}**!`).catch(() => {});
 
-    const time = ms(duration).replace("h", " saat").replace("m", " dakika").replace("s", " saniye");
+
     const log = new MessageEmbed()
       .setAuthor(member.user.username, member.user.avatarURL({ dynamic: true, size: 2048 }))
       .setColor("RED")
+      .setTitle("Member Voicemuted!")
       .setDescription(`
-${member.toString()} üyesi, \`${time}\` boyunca **sesli kanallarda** susturuldu!
+${member.toString()} has been voicemuted for \`${time}\` !
 
-Ceza ID: \`#${penal.id}\`
-Susturulan Üye: ${member.toString()} \`(${member.user.username.replace(/\`/g, "")} - ${member.user.id})\`
-Susturan Yetkili: ${message.author} \`(${message.author.username.replace(/\`/g, "")} - ${message.author.id})\`
-Susturma Tarihi: \`${moment(Date.now()).format("LLL")}\`
-Susturma Bitiş Tarihi: \`${moment(Date.now() + duration).format("LLL")}\`
-Susturma Sebebi: \`${reason}\`
+Case ID: \`#${penal.id}\`
+Voicemuted Member: ${member.toString()} \`(${member.user.username.replace(/\`/g, "")} - ${member.user.id})\`
+Voicemuted by: ${message.author} \`(${message.author.username.replace(/\`/g, "")} - ${message.author.id})\`
+Voicemuted at: \`${moment(Date.now()).format("LLL")}\`
+Voicemute End Date: \`${moment(Date.now() + duration).format("LLL")}\`
+Voicemute reason: \`${reason}\`
       `);
     message.guild.channels.cache.get(conf.penals.voiceMute.log).send(log);
 

@@ -22,7 +22,7 @@ module.exports = {
     try {
       var result = clean(await eval(code));
       if (result.includes(client.token))
-        return message.channel.send("Kancık seni .d");
+        return message.channel.send("ae");
       message.channel.send(result, { code: "js", split: true });
     } catch (err) {
       message.channel.send(err, { code: "js", split: true });

@@ -1,5 +1,4 @@
 const conf = require("../configs/config.json");
-const penals = require("../schemas/penals");
 
 module.exports = async (oldState, newState) => {
   if (oldState.channelID && !newState.channelID) return;
@@ -11,13 +10,7 @@ module.exports = async (oldState, newState) => {
     finishedPenal.removed = true;
     await finishedPenal.save();
   }
-
-  const activePenal = await penals.findOne({ guildID: newState.guild.id, userID: oldState.id, type: "VOICE-MUTE", active: true });
-  if (activePenal) {
-    if (!newState.serverMute) newState.setMute(true);
-    if (!conf.penals.voiceMute.roles.some((x) => newState.member.roles.cache.has(x))) newState.member.roles.add(conf.penals.voiceMute.roles);
-  }
-};
+}
 
 module.exports.conf = {
   name: "voiceStateUpdate",

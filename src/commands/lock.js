@@ -1,8 +1,8 @@
 module.exports = {
   conf: {
     aliases: ["lock"],
-    name: "kilit",
-    help: "kilit",
+    name: "lock",
+    help: "lock",
   },
 
   /**
@@ -17,12 +17,12 @@ module.exports = {
       message.channel.updateOverwrite(message.guild.roles.everyone, {
         SEND_MESSAGES: false,
       });
-      message.channel.send(embed.setDescription("Kanal kilitlendi!"));
+      message.channel.send("Channel locked!");
     } else {
       message.channel.updateOverwrite(message.guild.roles.everyone, {
         SEND_MESSAGES: null,
       });
-      message.channel.send(embed.setDescription("Kanal kilidi açıldı!"));
+      message.channel.send("Channel unlocked!");
     }
   },
 };

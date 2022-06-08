@@ -2,13 +2,12 @@ const conf = require("../configs/config.json");
 const { MessageEmbed } = require("discord.js");
 const moment = require("moment");
 moment.locale("tr");
-const penals = require("../schemas/penals");
 
 module.exports = {
   conf: {
-    aliases: ["warn","uyarı"],
-    name: "uyar",
-    help: "uyar [kullanıcı] [sebep]",
+    aliases: ["uyar","uyarı"],
+    name: "warn",
+    help: "warn [user] [reason]",
   },
 
   /**
@@ -18,29 +17,28 @@ module.exports = {
    */
 
   run: async (client, message, args, embed) => {
-    if (!message.member.hasPermission(8) && !conf.penals.warn.staffs.some(x => message.member.roles.cache.has(x))) return message.channel.error(message, "Yeterli yetkin bulunmuyor!");
+    if (!message.member.hasPermission(8) && !conf.penals.warn.staffs.some(x => message.member.roles.cache.has(x))) return message.channel.error(message, "Not enough Permission!");
     const member = message.mentions.members.first() || message.guild.members.cache.get(args[0]);
-    if (!member) return message.channel.error(message, "Bir üye belirtmelisin!");
-    const reason = args.slice(1).join(" ") || "Belirtilmedi!";
-    if (!message.member.hasPermission(8) && member.roles.highest.position >= message.member.roles.highest.position) return message.channel.error(message, "Kendinle aynı yetkide ya da daha yetkili olan birini uyaramazsın!");
+    if (!member) return message.channel.error(message, "Specify a member!");
+    const reason = args.slice(1).join(" ") || "Unspecified";
+    if (!message.member.hasPermission(8) && member.roles.highest.position >= message.member.roles.highest.position) return message.channel.error(message, "You can't warn someone that have the same or higher role than you!");
 
     const penal = await client.penalize(message.guild.id, member.user.id, "WARN", false, message.author.id, reason);
-    const data = await penals.find({ guildID: message.guild.id, userID: member.user.id, type: "WARN" });
-    if (data.length > 0 && conf.penals.warn.roles.some(x => data.length == x.warnCount)) member.roles.add(conf.penals.warn.roles.find(x => data.length == x.warnCount).role);
-    message.channel.send(embed.setDescription(`${member.toString()} üyesi, ${message.author} tarafından, \`${reason}\` nedeniyle susturuldu! \`(Ceza ID: #${penal.id})\``));
-    if (conf.dmMessages) member.send(`**${message.guild.name}** sunucusunda, **${message.author.tag}** tarafından, **${reason}** sebebiyle uyarıldınız!`).catch(() => {});
+    message.channel.send(`Member ${member.toString()} has been warned by ${message.author} due to their action of \`${reason}\`! \`(Case ID: #${penal.id})\``);
+    if (conf.dmMessages) member.send(`You have been warned at **${message.guild.name}** by **${message.author.tag}** due to your action of **${reason}**!`).catch(() => {});
     
     const log = new MessageEmbed()
       .setAuthor(member.user.username, member.user.avatarURL({ dynamic: true, size: 2048 }))
       .setColor("RED")
+      .setTitle("Member Warned")
       .setDescription(`
-${member.toString()} üyesi uyarıldı!
+${member.toString()} has been warned!
 
-Ceza ID: \`#${penal.id}\`
-Uyarılan Üye: ${member.toString()} \`(${member.user.username.replace(/\`/g, "")} - ${member.user.id})\`
-Uyaran Yetkili: ${message.author} \`(${message.author.username.replace(/\`/g, "")} - ${message.author.id})\`
-Uyarı Tarihi: \`${moment(Date.now()).format("LLL")}\`
-Uyarı Sebebi: \`${reason}\`
+Case ID: \`#${penal.id}\`
+Warned member: ${member.toString()} \`(${member.user.username.replace(/\`/g, "")} - ${member.user.id})\`
+Warned by: ${message.author} \`(${message.author.username.replace(/\`/g, "")} - ${message.author.id})\`
+Warned at: \`${moment(Date.now()).format("LLL")}\`
+Warn reason: \`${reason}\`
       `);
     message.guild.channels.cache.get(conf.penals.warn.log).send(log);
   },
