@@ -1,46 +1,46 @@
 {
-  "guildID": "",
+  "guildID": "938351593760378940",
   "dmMessages": true,
   "penals": {
     "ban": {
-      "staffs": [],
-      "log": "",
-      "limit": 0
+      "staffs": [714207165350543403, 712916365106872370],
+      "log": "983937669438529586",
+      "limit": 10
     },
     "jail": {
-      "staffs": [],
-      "roles": [],
-      "log": "",
-      "limit": 0
+      "staffs": [714207165350543403, 712916365106872370],
+      "roles": [983939341317439498],
+      "log": "983937669438529586",
+      "limit": 10
     },
     "chatMute": {
-      "staffs": [],
-      "roles": [],
-      "log": "",
-      "limit": 0
+      "staffs": [714207165350543403, 712916365106872370],
+      "roles": [978545837103783936],
+      "log": "983937669438529586",
+      "limit": 10
     },
     "voiceMute": {
-      "staffs": [],
-      "roles": [],
-      "log": "",
-      "limit": 0
+      "staffs": [714207165350543403, 712916365106872370],
+      "roles": [983938898910642237],
+      "log": "983937669438529586",
+      "limit": 10
     },
     "warn": {
-      "staffs": [],
+      "staffs": [714207165350543403, 712916365106872370],
       "roles": [{ "warnCount": 1, "role": "" }],
-      "log": ""
+      "log": "983937669438529586"
     }
   },
   "registration": {
     "unregRoles": []
   },
   "emojis": {
-    "mark": "",
-    "cross": ""
+    "mark": ":white_check_mark:",
+    "cross": ":x:"
   },
   "logs": {
     "voiceLog": "",
     "messageLog": ""
   },
-  "invite": ""
+  "invite": "https://discord.gg/YYDKcS64Sk"
 }
